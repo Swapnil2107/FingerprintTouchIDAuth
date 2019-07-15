@@ -1,0 +1,30 @@
+﻿@{
+	ViewBag.Title = "About";
+}
+<h2>@ViewBag.Title.</h2>
+<h3>@ViewBag.Message</h3>
+
+<p>Add devices</p>
+<input type="button" onclick="AddDeviceForUser('asefdsdfsdf','test')" />
+<script type="text/javascript">
+		function AddDeviceForUser(deviceId, deviceName) {
+		var deviceInfo = JSON.parse('{"deviceId" : "' + deviceId + '", "deviceName" : "' + deviceName + '"}');
+
+		$.ajax({
+			type: 'POST',
+			url: "http://localhost:55675/" + "FingerPrint/AddUpdateUserDevice",
+			data: deviceInfo,
+			success: function (result) {
+				if (result != null) {
+					debugger
+					@*$("#@(ViewBag.PageId)_ConfirmationDialog").find("#cancelButton").hide();
+					//$("#cancelButton").hide();
+					$("#@(ViewBag.PageId)_ConfirmationDialog").popup("open");
+                    window.Application.Models.UserDevicesViewModel().addUserDevice(result.UserDeviceID, result.DeviceID, result.DeviceName, result.ClientID );*@
+				}
+			},
+			error: function (jqxhr, textStatus, error){
+			}
+		});
+	}
+</script>
