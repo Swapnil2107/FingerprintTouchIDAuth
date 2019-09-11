@@ -1,63 +1,161 @@
 ﻿@using MVCWebApp.Models
 @model LoginViewModel
 @{
-    ViewBag.Title = "Log in";
+	ViewBag.Title = "Log in";
 }
-
+@{
+	string username = "";
+}
 <h2>@ViewBag.Title.</h2>
 <div class="row">
-    <div class="col-md-8">
-        <section id="loginForm">
-            @using (Html.BeginForm("Login", "Account", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
-            {
-                @Html.AntiForgeryToken()
-                <h4>Use a local account to log in.</h4>
-                <hr />
-                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-                <div class="form-group">
-                    @Html.LabelFor(m => m.Email, new { @class = "col-md-2 control-label" })
-                    <div class="col-md-10">
-                        @Html.TextBoxFor(m => m.Email, new { @class = "form-control" })
-                        @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
-                    </div>
-                </div>
-                <div class="form-group">
-                    @Html.LabelFor(m => m.Password, new { @class = "col-md-2 control-label" })
-                    <div class="col-md-10">
-                        @Html.PasswordFor(m => m.Password, new { @class = "form-control" })
-                        @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger" })
-                    </div>
-                </div>
-                <div class="form-group">
-                    <div class="col-md-offset-2 col-md-10">
-                        <div class="checkbox">
-                            @Html.CheckBoxFor(m => m.RememberMe)
-                            @Html.LabelFor(m => m.RememberMe)
-                        </div>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <div class="col-md-offset-2 col-md-10">
-                        <input type="submit" value="Log in" class="btn btn-default" />
-                    </div>
-                </div>
-                <p>
-                    @Html.ActionLink("Register as a new user", "Register")
-                </p>
-                @* Enable this once you have account confirmation enabled for password reset functionality
-                    <p>
-                        @Html.ActionLink("Forgot your password?", "ForgotPassword")
-                    </p>*@
-            }
-        </section>
-    </div>
-    <div class="col-md-4">
-        <section id="socialLoginForm">
-            @Html.Partial("_ExternalLoginsListPartial", new ExternalLoginListViewModel { ReturnUrl = ViewBag.ReturnUrl })
-        </section>
-    </div>
+	<div class="col-md-8">
+		<section id="loginForm">
+			@using (Html.BeginForm("Login", "Account", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+			{
+				@Html.AntiForgeryToken()
+				<h4>Use a local account to log in.</h4>
+				<hr />
+				@Html.ValidationSummary(true, "", new { @class = "text-danger" })
+				<div class="form-group">
+					@Html.LabelFor(m => m.Email, new { @class = "col-md-2 control-label" })
+					<div class="col-md-10">
+						@Html.TextBoxFor(m => m.Email, new { @class = "form-control" })
+						@Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
+					</div>
+				</div>
+				<div class="form-group">
+					@Html.LabelFor(m => m.Password, new { @class = "col-md-2 control-label" })
+					<div class="col-md-10">
+						@Html.PasswordFor(m => m.Password, new { @class = "form-control" })
+						@Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger" })
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="col-md-offset-2 col-md-10">
+						<div class="checkbox">
+							@Html.CheckBoxFor(m => m.RememberMe)
+							@Html.LabelFor(m => m.RememberMe)
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="col-md-offset-2 col-md-10">
+						<input type="submit" value="Log in" class="btn btn-default" />
+					</div>
+				</div>
+				<p>
+					@Html.ActionLink("Register as a new user", "Register")
+				</p>
+				@* Enable this once you have account confirmation enabled for password reset functionality
+			<p>
+				@Html.ActionLink("Forgot your password?", "ForgotPassword")
+			</p>*@
+			}
+			@*<input id="btnfingerprintlogin" type="button" value="Fingerprint" onclick="UserAuthenticated('420095af900a6409')" />*@
+			<input type="hidden" id="IsValidDeviceID" value="" />
+		</section>
+	</div>
+	<div class="col-md-4">
+		<section id="socialLoginForm">
+			@Html.Partial("_ExternalLoginsListPartial", new ExternalLoginListViewModel { ReturnUrl = ViewBag.ReturnUrl })
+		</section>
+	</div>
 </div>
 
 @section Scripts {
-    @Scripts.Render("~/bundles/jqueryval")
+	@Scripts.Render("~/bundles/jqueryval")
+
+<script type="text/javascript">
+		$(document).ready(function () {
+			// alert('hi')
+			//$('btnfingerprintlogin').hide();
+			//call below function on xamarin call
+			//ValidateBiometricDevice('erter', true);
+
+		});
+
+		function ValidateBiometricDevice(deviceID, isBiometricDevice) {
+			// alert('ValidateBiometricDevice');
+			localStorage.setItem("isDeviceHardwareEnabled", isBiometricDevice);
+			localStorage.setItem("deviceID", deviceID);
+			// alert(isBiometricDevice);
+			if (isBiometricDevice == true || isBiometricDevice == 'True') {
+				// alert('isBiometricDevice');
+				//$('#IsValidDeviceID').val('false');
+				validateByDeviceId(deviceID);
+			}
+
+
+		}
+
+		function validateByDeviceId(deviceID) {
+			// alert('validateByDeviceId');
+
+			$.ajax({
+				type: 'GET',
+				url: "http://192.168.1.187:55675/" + "FingerPrint/ValidateDeviceID?deviceID=" + deviceID,
+				async: false,
+				success: function (result) {
+					if (result.IsEnabledUser == 'True') {
+						//show fingerprint login icon and call below function on fingerprint recived.
+						//LoginUser(result.UserName);
+						$('#IsValidDeviceID').val('true');
+						$('btnfingerprintlogin').show();
+						openBiometricPopUp();
+					}
+				},
+				error: function (jqxhr, textStatus, error) {
+					//window.Application.ViewModels.Navigation.showErrorMessage('', null, jqxhr);
+				}
+			});
+		}
+
+		function openBiometricPopUp() {
+			// alert('openBiometricPopUp' + $('#IsValidDeviceID').val());
+			if ($('#IsValidDeviceID').val() == "true") {
+				if (typeof window.wx !== 'undefined') {// use typepof to check undefined //for android only
+					setTimeout(function () {
+						window.wx.ShowFingerPrintDailogForLogin($('#HiddenDeviceUser').val());
+					}, 100);
+				}
+				if (typeof window.webkit !== 'undefined' && typeof window.webkit.messageHandlers.invokeAction !== 'undefined') {//for ios only
+					setTimeout(function () {
+						window.webkit.messageHandlers.invokeAction.postMessage("ShowFingerPrintDailogForLogin");
+					}, 500);
+				}
+			}
+		}
+		function UserAuthenticated(deviceId) {
+
+			$.ajax({
+				type: "GET",
+				url: "http://192.168.1.187:55675/" + "Account/FingerPrintUserLogin?deviceID=" + deviceId,
+				contentType: "application/json; charset=utf-8",
+				dataType: "html",
+				success: function (response) {
+					response=JSON.parse(response);
+					if (response.result == 'Redirect')
+						window.location = '@Url.Action("Index", "Home", null, Request.Url.Scheme)';
+				}
+			});
+		}
+				//function LoginUser(userName) {
+				//	$.ajax({
+				//		type: 'POST',
+				//		url: "http://localhost:55675/" + "Account/Login?IsBiometeric=true",
+				//		async: false,
+				//		data: { "email": userName, "rememberMe": "false" },
+				//		success: function (result) {
+				//			debugger;
+				//		},
+				//		error: function (jqxhr, textStatus, error) {
+				//			debugger
+				//			//window.Application.ViewModels.Navigation.showErrorMessage('', null, jqxhr);
+				//		}
+				//	});
+				//}
+
+</script>
+
 }
+

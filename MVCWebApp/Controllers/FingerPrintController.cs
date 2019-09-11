@@ -20,8 +20,6 @@ namespace MVCWebApp.Controllers
 		[HttpGet]
 		public JsonResult ValidateDeviceID(string deviceID)
 		{
-			//int x = 5;
-			//x = x / 0;
 			_base = new MVCAuthEntities();
 			var userDevice = _base.UserDevices.Where(u => u.DeviceID == deviceID && u.IsActive == true && u.DeleteFlag == false).FirstOrDefault();
 			if (userDevice == null)
@@ -31,7 +29,7 @@ namespace MVCWebApp.Controllers
 
 			return Json(new { IsEnabledUser = "True", UserName = userDevice.AspNetUser.UserName }, "application/json", System.Text.Encoding.UTF8, JsonRequestBehavior.AllowGet);
 		}
-		[AllowAnonymous]
+
 		[HttpPost]
 		public JsonResult AddUpdateUserDevice(Guid? userDeviceID, string deviceID = null, string deviceName = null)
 		{

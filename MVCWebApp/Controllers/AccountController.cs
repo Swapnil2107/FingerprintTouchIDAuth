@@ -17,15 +17,17 @@ namespace MVCWebApp.Controllers
     {
         private ApplicationSignInManager _signInManager;
         private ApplicationUserManager _userManager;
-
-        public AccountController()
+		MVCAuthEntities _dbcontext;
+		public AccountController()
         {
-        }
+			_dbcontext = new MVCAuthEntities();
+		}
 
         public AccountController(ApplicationUserManager userManager, ApplicationSignInManager signInManager )
         {
             UserManager = userManager;
             SignInManager = signInManager;
+
         }
 
         public ApplicationSignInManager SignInManager
@@ -52,12 +54,35 @@ namespace MVCWebApp.Controllers
             }
         }
 
-        //
-        // GET: /Account/Login
-        [AllowAnonymous]
+		[AllowAnonymous]
+		[HttpGet]
+		public virtual async System.Threading.Tasks.Task<ActionResult> FingerPrintUserLogin(string deviceID)
+		{
+			if (string.IsNullOrWhiteSpace(deviceID))
+				return Redirect("/Account/Login");
+
+			var userDevice = _dbcontext.UserDevices.Where(i => i.DeviceID == deviceID && i.DeleteFlag == false && i.IsActive == true).FirstOrDefault();
+			if (userDevice == null)
+			{
+				return Redirect("/Account/Login");
+			}
+			else
+			{
+				var user = userDevice.AspNetUser;
+				return await Login(new LoginViewModel()
+				{
+					Email = user.UserName
+				}, "", true);
+			}
+		}
+
+
+		//
+		// GET: /Account/Login
+		[AllowAnonymous]
         public ActionResult Login(string returnUrl)
         {
-            ViewBag.ReturnUrl = returnUrl;
+			ViewBag.ReturnUrl = returnUrl;
             return View();
         }
 
@@ -96,9 +121,8 @@ namespace MVCWebApp.Controllers
 			{
 				var user = await UserManager.FindByNameAsync(model.Email);
 				await SignInManager.SignInAsync(user, true, true);
-
-				return RedirectToAction("index");
-				
+				var urlredirect = Url.Action("Index", "Home");
+				return Json(new { result = "Redirect", url = urlredirect }, JsonRequestBehavior.AllowGet);
 			}
 			
            
